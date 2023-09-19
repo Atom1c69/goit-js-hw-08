@@ -9,6 +9,7 @@ const savePlayTime = throttle(function () {
   });
 }, 1000);
 
+localStorage.setItem('local', 'test');
 videoPlayer.on('timeupdate', savePlayTime);
 
 videoPlayer.ready().then(function () {
