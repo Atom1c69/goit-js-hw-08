@@ -1,44 +1,38 @@
+import throttle from 'lodash.throttle';
+
 const form = document.querySelector('.feedback-form');
-// const emailInput = form.querySelector('input[name="email"]');
-// const messageInput = form.querySelector('textarea[name="message"]');
 const STORAGE_KEY = 'feedback-form-state';
 
-const saveFormState = throttle(() => {
-  // const formState = {
-  //   email: emailInput.value,
-  //   message: messageInput.value,
-  // };
-  formState[e.target.name] = e.target.value.trim();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(formState));
-}, 500);
+form.addEventListener('input', throttle(feedbackFormStateSave, 500));
+form.addEventListener('submit', handleReset);
 
-const loadFormState = () => {
+let formValue = {};
+
+function feedbackFormStateSave(event) {
+  formValue[event.target.name] = event.target.value.trim();
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formValue));
+}
+
+function handleReset(event) {
+  event.preventDefault();
+  console.log(formValue);
+  formValue = {};
+
+  localStorage.removeItem(STORAGE_KEY);
+  event.target.reset();
+}
+
+function refreshForm() {
   try {
-    const savedFormState = localStorage.getItem(STORAGE_KEY);
-    if (!savedFormState) return;
-    const formState = JSON.parse(savedFormState);
-    Object.entries(formState).forEach(([key, val]) => {
+    const saveData = localStorage.getItem(STORAGE_KEY);
+    if (!saveData) return;
+    formValue = JSON.parse(saveData);
+    Object.entries(formValue).forEach(([key, val]) => {
       form.elements[key].value = val;
     });
   } catch ({ message }) {
     console.log(message);
   }
-};
-
-form.addEventListener('input', saveFormState);
-window.addEventListener('load', loadFormState);
-form.addEventListener('submit', function (event) {
-  event.preventDefault();
-
-  localStorage.removeItem(STORAGE_KEY);
-  event.target.reset();
-  // emailInput.value = '';
-  // messageInput.value = '';
-
-  // const formState = {
-  //   email: emailInput.value,
-  //   message: messageInput.value,
-  // };
-  console.log(formState);
-  formState = {};
-});
+}
+refreshForm();
